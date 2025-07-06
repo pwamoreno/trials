@@ -2,18 +2,45 @@
 
 import Image from "next/image";
 import { user } from "@/lib/data/user";
+import { courses } from "@/lib/data/courses";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Navbar from "@/components/devtutsComp/Navbar";
+import { AlignLeft, ChevronDown, PlusIcon } from "lucide-react";
+import Courses from "@/components/devtutsComp/Courses";
+import CourseFilter from "@/components/devtutsComp/CourseFilter";
+import CourseSort from "@/components/devtutsComp/CourseSort";
+import Loader from "@/components/devtutsComp/Loader";
 
 const DevtutsHome = () => {
   const [userStatus, setUserStatus] = useState(user.signedIn);
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true)
+
+  const categories = [...new Set(courses.map((course) => course.category))];
+
+  const newFilterCourses = useMemo(() => {
+    return courses
+      .filter((course) =>
+        course.title.toLowerCase().includes(search.toLowerCase())
+      )
+      .filter((course) =>
+        selectedCategory === "All" ? true : course.category === selectedCategory
+      );
+  }, [search, selectedCategory]);
+
+  setTimeout(() => {
+    setLoading(false)
+  }, 3000)
 
   if (!userStatus) {
     return (
       <div className="mt-12 mx-12 max-md:mx-12">
         <div className="flex justify-between">
-          <Image src="/next.svg" alt="logo" width={50} height={50} />
+          <Image src="/Asset3.svg" alt="logo" width={50} height={50} />
           <div className="flex items-center">
             <button
               onClick={() => setUserStatus(!user.signedIn)}
@@ -58,9 +85,10 @@ const DevtutsHome = () => {
   return (
     <div className="mt-12 mx-12 max-md:mx-6">
       <div className="flex justify-between">
-        <Image src="/next.svg" alt="logo" width={50} height={50} />
+        <Link href="/devtuts">
+          <Image src="/Asset3.svg" alt="logo" width={30} height={50} />
+        </Link>
         <div className="flex items-center">
-          {/* <p>Welcome {user.name}!</p> */}
           <div className="border border-slate-200 rounded-full p-4 bg-slate-100 overflow-hidden relative">
             <Link href="/devtuts/profile">
               <Image
@@ -71,13 +99,62 @@ const DevtutsHome = () => {
               />
             </Link>
           </div>
-          <p className="ml-4">
+          <p className="ml-4 max-md:hidden">
             Welcome <strong>{user.username}!</strong>
           </p>
         </div>
       </div>
 
       <Navbar />
+
+      {/* Main body of page */}
+      <div className="flex items-center justify-between px-4 py-12 shadow">
+        <p className="font-medium text-xl">Courses</p>
+        <button className="flex items-center bg-black text-white text-sm font-bold w-fit hover:cursor-pointer py-2 px-4 rounded-md">
+          Add Course
+          <PlusIcon size={15} className="ml-2" />
+        </button>
+      </div>
+
+      <div className="my-6 relative">
+        <button
+          className="inline-flex items-center justify-between shadow py-2 rounded-md gap-2 px-2 hover:cursor-pointer"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <span className="flex items-center gap-2 font-bold text-sm">
+            <AlignLeft size={15} />
+            Sort by categories
+          </span>
+          <span className="ml-12">
+            <ChevronDown size={15} />
+          </span>
+        </button>
+        <div className="absolute z-50">
+          {isOpen ? (
+            <div className="flex flex-col shadow border border-slate-300 w-fit px-4 py-4 bg-white">
+              <CourseSort
+                selected={selectedCategory}
+                setSelected={setSelectedCategory}
+                categories={categories}
+              />
+            </div>
+          ) : (
+            <span className="hidden"></span>
+          )}
+        </div>
+      </div>
+      <div className="flex w-full gap-5 max-md:flex-col-reverse max-md:items-center">
+        <div className="px-4 py-6 shadow rounded-md w-2/3 max-md:w-full">
+          {
+            loading ? <Loader /> : 
+            <Courses courses={newFilterCourses} />
+          }
+        </div>
+        <div className="px-4 py-6 shadow rounded-md  w-1/3 h-fit max-md:w-full">
+          <CourseFilter search={search} setSearch={setSearch} />
+          <hr className="mt-5 w-full bg-gray-200 p-[1px] border-none"/>
+        </div>
+      </div>
     </div>
   );
 };

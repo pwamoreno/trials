@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 const navItems = [
-  { name: "Course", href: "/devtuts" },
+  { name: "Courses", href: "/devtuts" },
   { name: "Resources", href: "/devtuts/resources" },
   { name: "Settings", href: "/devtuts/settings" },
 ];
@@ -34,7 +34,7 @@ const Navbar = () => {
   }, [pathname]);
 
   return (
-    <div className="relative border-b border-gray-200 dark:border-neutral-800">
+    <div className="relative border-b border-gray-200 dark:border-neutral-800 mt-3 max-md:mt-6">
       <div ref={containerRef} className="flex space-x-6 px-4 relative">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
